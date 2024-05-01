@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <iostream>
+#include <functional>
 
 class Image {
 public:
@@ -15,24 +16,14 @@ public:
 		return m_rows <= 1024 && m_columns <= 1024;
 	}
 
-	int pixelParser(bool shouldBrightenFullImage, int brightnessFactor, const std::shared_ptr<Image> imageToAdd)
-	{
-		int attenuatedCount = 0;
+	void pixelRunner(std::function<uint8_t(uint8_t, int)> pixelProcessor) {
+		std::cout << "-- pixelRunner: lambda version\n";
 		for (int x = 0; x < m_rows; x++) {
 			for (int y = 0; y < m_columns; y++) {
 				int pixelIndex = x * m_columns + y;
-				uint8_t brightnessFactorToAdd = (shouldBrightenFullImage) ? brightnessFactor : imageToAdd->pixels[pixelIndex];
-				if (int(pixels[pixelIndex]) + brightnessFactorToAdd > 255) {
-					++attenuatedCount;
-					pixels[pixelIndex] = 255;
-				}
-				else {
-					pixels[pixelIndex] += brightnessFactorToAdd;
-				}
+				pixels[pixelIndex] = pixelProcessor(pixels[pixelIndex], pixelIndex);
 			}
 		}
-		return attenuatedCount;
-
 	}
 
 	const uint16_t m_rows;

@@ -13,8 +13,6 @@ namespace brighteningtest
 		{
 			auto image = std::make_shared<Image>(2, 2);
 			initialize(image);
-			//image->pixels[0] = 45; image->pixels[1] = 55;
-			//image->pixels[2] = 65; image->pixels[3] = 254;
 
 			ImageBrightener brightener(image);
 			int attenuatedCount = 0;
@@ -28,8 +26,7 @@ namespace brighteningtest
 		{
 			auto image = std::make_shared<Image>(2, 2);
 			initialize(image);
-			//image->pixels[0] = 45; image->pixels[1] = 55;
-			//image->pixels[2] = 65; image->pixels[3] = 75;
+			image->pixels[3] = 75;
             ImageBrightener brightener(image);
             
             // Test by brightening only the right part
@@ -45,11 +42,12 @@ namespace brighteningtest
             Assert::AreEqual(0, attenuatedCount);
 		}
 
-		private initialize(std::shared_ptr<Image> image)
-		{
-			image->pixels[0] = 45; image->pixels[1] = 55;
-			image->pixels[2] = 65; image->pixels[3] = 254;
+	private:
+	void initialize(std::shared_ptr<Image> image)
+	{
+		image->pixels[0] = 45; image->pixels[1] = 55;
+		image->pixels[2] = 65; image->pixels[3] = 254;
 
-		}
+	}
 	};
 }
