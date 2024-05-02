@@ -12,11 +12,12 @@ namespace brighteningtest
 		TEST_METHOD(BrightensWholeImage)
 		{
 			auto image = std::make_shared<Image>(2, 2);
-			image->pixels[0] = 45; image->pixels[1] = 55;
-			image->pixels[2] = 65; image->pixels[3] = 254;
+			initialize(image);
 
 			ImageBrightener brightener(image);
-			int attenuatedCount = brightener.BrightenWholeImage();
+			int attenuatedCount = 0;
+			bool succeeded =brightener.BrightenWholeImage(attenuatedCount);
+			Assert::IsTrue(succeeded);
 			Assert::AreEqual(1, attenuatedCount);
 			Assert::AreEqual(90, int(image->pixels[2]));
 		}
@@ -24,8 +25,8 @@ namespace brighteningtest
 		TEST_METHOD(BrightensWithAnotherImage)
 		{
 			auto image = std::make_shared<Image>(2, 2);
-			image->pixels[0] = 45; image->pixels[1] = 55;
-			image->pixels[2] = 65; image->pixels[3] = 75;
+			initialize(image);
+			image->pixels[3] = 75;
             ImageBrightener brightener(image);
             
             // Test by brightening only the right part
@@ -40,5 +41,13 @@ namespace brighteningtest
             Assert::AreEqual(80, int(image->pixels[1])); // right-side pixel is brightened
             Assert::AreEqual(0, attenuatedCount);
 		}
+
+	private:
+	void initialize(std::shared_ptr<Image> image)
+	{
+		image->pixels[0] = 45; image->pixels[1] = 55;
+		image->pixels[2] = 65; image->pixels[3] = 254;
+
+	}
 	};
 }
