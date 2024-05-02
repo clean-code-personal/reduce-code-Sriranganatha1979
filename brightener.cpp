@@ -6,23 +6,16 @@ ImageBrightener::ImageBrightener(std::shared_ptr<Image> inputImage): m_inputImag
 bool ImageBrightener::BrightenWholeImage(int& attenuatedPixelCount) {
     if (!m_inputImage->imageSizeIsValid()) {
         return false;
-    }
+    }    
 
-    // For brightening, we add a certain grayscale (25) to every pixel.
-    // While brightening, some pixels may cross the max brightness. They are
-    // called 'attenuated' pixels
-    m_inputImage->pixelRunner([&attenuatedPixelCount](uint8_t pixelGrayscale, int pixelIndex) {
-        uint8_t outputGrayscale = pixelGrayscale;
-        if (outputGrayscale > (255 - 25)) {
-            ++attenuatedPixelCount;
-            outputGrayscale = 255;
-        }
-        else {
-            outputGrayscale += 25;
-        }
-
-        return outputGrayscale;
-        });
+    m_inputImage->pixelRunner(
+        [&attenuatedPixelCount, this](uint8_t pixelGrayscale, int pixelIndex) {
+            // For brightening, we add a certain grayscale (25) to every pixel.
+            // While brightening, some pixels may cross the max brightness. They are
+            // called 'attenuated' pixels
+            uint8_t brightnessToAdd = 25;
+            return this->pixelAdderWithAttentuation(pixelGrayscale, pixelIndex, brightnessToAdd, attenuatedPixelCount);
+        } );
     return true;
 }
 
@@ -35,19 +28,23 @@ bool ImageBrightener::AddBrighteningImage(const std::shared_ptr<Image> imageToAd
         return false;
     }
 
-    m_inputImage->pixelRunner([&attenuatedPixelCount, imageToAdd](uint8_t pixelGrayscale, int pixelIndex) {
-        uint8_t outputGrayscale = pixelGrayscale;
-        uint8_t pixelsToAdd = imageToAdd->pixels[pixelIndex];
-        if (outputGrayscale > (255 - pixelsToAdd)) {
-            ++attenuatedPixelCount;
-            outputGrayscale = 255;
-        }
-        else {
-            outputGrayscale += pixelsToAdd;
-        }
-
-        return outputGrayscale;
-        });
+    m_inputImage->pixelRunner(
+        [&attenuatedPixelCount, imageToAdd, this](uint8_t pixelGrayscale, int pixelIndex) {
+            uint8_t brightnessToAdd = imageToAdd->pixels[pixelIndex];
+            return this->pixelAdderWithAttentuation(pixelGrayscale, pixelIndex, brightnessToAdd, attenuatedPixelCount);
+        } );
     return true;
 }
 
+int ImageBrightener::pixelAdderWithAttentuation(uint8_t sourcepixel, int pixelIndex, uint8_t brightnessToAdd, int& attentuatedCount)
+{
+    if (sourcepixel > (255 - brightnessToAdd)) {
+        ++attentuatedCount;
+        sourcepixel = 255;
+    }
+    else {
+        sourcepixel += brightnessToAdd;
+    }
+
+    return sourcepixel;
+}
